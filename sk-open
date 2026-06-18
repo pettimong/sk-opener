@@ -1,0 +1,29 @@
+#!/bin/bash
+# sk-open: A fast file opener using fd, skim, and file MIME types.
+
+target=$(fd --type f --hidden --exclude .git | sk)
+
+[ -z "$target" ] && exit 0
+
+mime=$(file --mime-type -b "$target")
+
+case "$mime" in
+    video/*)
+        mpv "$target" >/dev/null 2>&1 &
+        ;;
+    audio/*)
+        kitty -e mpv --no-video "$target" >/dev/null 2>&1 &
+        ;;
+    application/pdf)
+        zathura "$target" >/dev/null 2>&1 &
+        ;;
+    image/*)
+        imv "$target" >/dev/null 2>&1 &
+        ;;
+    text/* | application/json | inode/x-empty)
+        vim "$target"
+        ;;
+    *)
+        vim "$target"
+        ;;
+esac
